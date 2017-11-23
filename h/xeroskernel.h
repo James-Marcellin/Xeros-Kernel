@@ -87,6 +87,11 @@ void           outb(unsigned int, unsigned char);
 
 /* Structure to track the information associated with a single process */
 
+typedef struct signalEntry {
+    funcptr handler;
+} signalEntry;
+
+
 typedef struct struct_pcb pcb;
 struct struct_pcb {
   void        *esp;    /* Pointer to top of saved stack           */
@@ -97,6 +102,8 @@ struct struct_pcb {
   int          ret;    /* Return value of system call             */
                        /* if process interrupted because of system*/
                        /* call                                    */
+  signalEntry signalTable[32];
+  int         signalsWaiting;
   long         args;   
   unsigned int otherpid;
   void        *buffer;
@@ -105,6 +112,13 @@ struct struct_pcb {
   long         cpuTime;  /* CPU time consumed                     */
 };
 
+typedef struct signal_stack {
+    unsigned int ret;
+    funcptr handler;
+    unsigned int esp;
+    unsigned int old_sp;
+    int ignoreSignalMask;
+}signal_stack;
 
 typedef struct struct_ps processStatuses;
 struct struct_ps {
