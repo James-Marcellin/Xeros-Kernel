@@ -80,22 +80,32 @@ void     dispatch( void ) {
       case ( SYS_SIGHANDLER ):
         ap = (va_list)p->args;
 		signum = va_arg( ap, int );
-		fnpt newhandler = (fnpt)( va_arg( ap, void ) );
-		fnpt* oldhandler = (fnpt)( va_arg( ap, void* ) );
+		funcptr  newhandler = (funcptr)( va_arg( ap, int ) );
+		funcptr* oldhandler = (funcptr*)( va_arg( ap, int* ) );
 
-		if( signum < 0 || signum > 31 ) {
-			kprintf( "invalid signal %d\n", signum );
-			p->ret = -1;
-			break;
+		if( signum < 0  ||
+			signum > 31 ||
+			(funcptr*)oldhandler == (funcptr*)p->signalTable[31].handler ) {
+				kprintf( "invalid signal %d\n", signum );
+				p->ret = -1;
+				break;
 		}
 
-		
+		// check handler address' validity
+		// if invalid, return -2
 
+		p->signalTable[signum].handler = newhandler;
+		p->signalTable[signum].oldhandler = oldhandler;
+		kprintf( "new handler installed\n" );
+
+		p->ret = 0;
 		break;
 
       case ( SYS_SIGRETURN ):
         ap = (va_list)p->args;
-		p->ret = kill(p, va_arg( ap, int ) );
+		long old_sp = (long) va_arg( ap, void* );
+
+		p->esp = old_sp;
 		break;
 
       case ( SYS_KILL ):

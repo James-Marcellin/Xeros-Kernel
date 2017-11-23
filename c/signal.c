@@ -13,36 +13,36 @@ void sigtramp(void (*handler)(void *), void *cntx){
 	syssigreturn(cFrame);
 	}
 	
-int signal(int pid, int sig_num) {
+int signal(int pid, int signum) {
 
-    if (!isValidSignalNumber(sig_num)) return -2;
+    if (signum < 0 || signum > 31) return -2;
 
 	pcb* process = getProcess(pid);	
 	if (!process) return -1;
         
     int signalsWaiting = process->signalsWaiting;
     
-    signalEntry* sig_entry = &process->signalTable[sig_num];
+    signalEntry* sig_entry = &process->signalTable[signum];
     funcptr handler = (funcptr)(sig_entry->handler);
     long old_sp = process->esp;
     
     unsigned int stackPosition = process->esp;
     stackPosition -= sizeof(signal_stack);
-    signal_stack* signalStack = (signal_stack*)(stackPos);
+    signal_stack* signalStack = (signal_stack*)(stackPosition);
     signalStack->handler = handler;
     signalStack->esp = old_sp;
     signalStack->ret = process->ret;
     signalStack->old_sp = old_sp;
     
-    stackPos -= sizeof(context_frame);
-    context_frame* CF = (context_frame*)(stackPos);
-    CF->ebp = stackPos;
-    CF->esp = stackPos;
+    stackPosition -= sizeof(context_frame);
+    context_frame* CF = (context_frame*)(stackPosition);
+    CF->ebp = stackPosition;
+    CF->esp = stackPosition;
     CF->iret_eip = &sigtramp;
     CF->iret_cs = getCS();
     CF->eflags = 0x00003200;    
         
-    process->esp = stackPos;
+    process->esp = stackPosition;
     
     
     return 0;

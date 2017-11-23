@@ -87,8 +87,11 @@ void           outb(unsigned int, unsigned char);
 
 /* Structure to track the information associated with a single process */
 
+typedef void (*funcptr)(void);
+
 typedef struct signalEntry {
-    funcptr handler;
+    funcptr	   handler;
+	funcptr	  *oldhandler;
 } signalEntry;
 
 
@@ -102,8 +105,8 @@ struct struct_pcb {
   int          ret;    /* Return value of system call             */
                        /* if process interrupted because of system*/
                        /* call                                    */
-  signalEntry signalTable[32];
-  int         signalsWaiting;
+  signalEntry  signalTable[32];
+  int          signalsWaiting;
   long         args;   
   unsigned int otherpid;
   void        *buffer;
@@ -114,7 +117,7 @@ struct struct_pcb {
 
 typedef struct signal_stack {
     unsigned int ret;
-    funcptr handler;
+    funcptr	   	 handler;
     unsigned int esp;
     unsigned int old_sp;
     int ignoreSignalMask;
@@ -196,6 +199,9 @@ int		syssighandler( int signal, void (*newhandler)(void *), void (** oldHandler)
 void	syssigreturn( void *old_sp );
 int		syskill( int PID, int signalNumber );
 int		syswait( int PID );
+
+void sigtramp(void (*handler)(void *), void *cntx);
+int signal(int pid, int sig_num);
 
 pcb		*getProcess( int pid );
 
