@@ -64,10 +64,35 @@ unsigned int syssleep( unsigned int t ) {
     return syscall( SYS_SLEEP, t );
 }
 
-int syskill(int pid) {
-  return syscall(SYS_KILL, pid);
-}
-
 int sysgetcputimes(processStatuses *ps) {
   return syscall(SYS_CPUTIMES, ps);
 }
+
+/*****************************/
+/* 2.3.1 Signal system calls */
+/*****************************/
+
+int syssighandler( int signal, void (*newhandler)(void *), void (** oldhandler)(void *) ) {
+
+	return syscall( SYS_SIGHANDLER, signal, newhandler, oldhandler );
+
+}
+
+void syssigreturn( void *old_sp ) {
+
+	syscall( SYS_SIGRETURN, old_sp );
+
+}
+
+int syskill( int PID, int signalNumber ) {
+
+	return syscall( SYS_KILL, PID, signalNumber );
+
+}
+
+int syswait( int PID ) {
+
+	return syscall( SYS_WAIT, PID );
+
+}
+

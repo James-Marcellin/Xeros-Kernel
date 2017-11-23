@@ -73,8 +73,17 @@ void           outb(unsigned int, unsigned char);
 #define SYS_GETPID      144
 #define SYS_PUTS        155
 #define SYS_SLEEP       166
-#define SYS_KILL        177
 #define SYS_CPUTIMES    178
+
+/***********************/
+/* 2.3 related defines */
+/***********************/
+#define STATE_WAIT		24
+
+#define SYS_SIGHANDLER	160
+#define SYS_SIGRETURN	170
+#define SYS_KILL		177
+#define SYS_WAIT		180
 
 /* Structure to track the information associated with a single process */
 
@@ -164,8 +173,18 @@ void         sysstop( void );
 unsigned int sysgetpid( void );
 unsigned int syssleep(unsigned int);
 void         sysputs(char *str);
-int          syskill(int pcb);
 int          sysgetcputimes(processStatuses *ps);
+
+/**************************/
+/* 2.3 related prototypes */
+/**************************/
+int		syssighandler( int signal, void (*newhandler)(void *), void (** oldHandler)(void *) );
+void	syssigreturn( void *old_sp );
+int		syskill( int PID, int signalNumber );
+int		syswait( int PID );
+
+pcb		*getProcess( int pid );
+
 
 
 /* The initial process that the system creates and schedules */
