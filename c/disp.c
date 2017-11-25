@@ -25,6 +25,11 @@ void     dispatch( void ) {
 	int			pid;
 	int			signum;
 	pcb			*temp_p;
+	int			devnum;
+	int			fd;
+	void*		buff;
+	int			bufflen;
+
 
     for( p = next(); p; ) {
       //      kprintf("Process %x selected stck %x\n", p, p->esp);
@@ -78,7 +83,7 @@ void     dispatch( void ) {
 /************************/
 
       case ( SYS_SIGHANDLER ):
-        ap = (va_list)p->args;
+        ap = (va_list) p->args;
 		signum = va_arg( ap, int );
 		funcptr  newhandler = (funcptr)( va_arg( ap, int ) );
 		funcptr* oldhandler = (funcptr*)( va_arg( ap, int* ) );
@@ -91,8 +96,8 @@ void     dispatch( void ) {
 				break;
 		}
 
-		// check handler address' validity
-		// if invalid, return -2
+		// (check handler address' validity)
+		// (if invalid, return -2)
 
 		p->signalTable[signum].handler = newhandler;
 		p->signalTable[signum].oldhandler = oldhandler;
@@ -102,14 +107,14 @@ void     dispatch( void ) {
 		break;
 
       case ( SYS_SIGRETURN ):
-        ap = (va_list)p->args;
+        ap = (va_list) p->args;
 		long old_sp = (long) va_arg( ap, void* );
 
 		p->esp = old_sp;
 		break;
 
       case ( SYS_KILL ):
-        ap = (va_list)p->args;
+        ap = (va_list) p->args;
 		pid = va_arg( ap, int );
 		signum = va_arg( ap, int );
 
@@ -132,10 +137,39 @@ void     dispatch( void ) {
 		break;
 
       case ( SYS_WAIT ):
-        ap = (va_list)p->args;
+        ap = (va_list) p->args;
 		pid = va_arg( ap, int );
 		p->ret = kill( p, pid );
 		p = next();
+		break;
+
+/************************/
+/* 2.3 syscall handling */
+/************************/
+
+      case ( SYS_OPEN ):
+		ap = (va_list) p->args;
+		devnum = va_arg( ap, int );
+		p->ret = di_open( p, devnum );
+		break;
+
+      case ( SYS_CLOSE ):
+		ap = (va_list) p->args;
+		fd = va_arg( ap, int );
+		p->ret = di_close( p, fd );
+		break;
+
+      case ( SYS_WRITE ):
+		ap = (va_list) p->args;
+		
+		break;
+
+      case ( SYS_READ ):
+		ap = (va_list) p->args;
+		break;
+
+      case ( SYS_IOCTL ):
+		ap = (va_list) p->args;
 		break;
 
 

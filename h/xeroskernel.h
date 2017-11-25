@@ -85,6 +85,16 @@ void           outb(unsigned int, unsigned char);
 #define SYS_KILL		177
 #define SYS_WAIT		180
 
+/***********************/
+/* 2.4 related defines */
+/***********************/
+#define SYS_OPEN		44
+#define SYS_CLOSE		55
+#define SYS_WRITE		66
+#define SYS_READ		77
+#define SYS_IOCTL		88
+
+
 /* Structure to track the information associated with a single process */
 
 typedef void (*funcptr)(void);
@@ -204,6 +214,18 @@ void sigtramp(void (*handler)(void *), void *cntx);
 int signal(int pid, int sig_num);
 
 pcb		*getProcess( int pid );
+
+/**************************/
+/* 2.4 related prototypes */
+/**************************/
+int sysopen( int devnum );
+int sysclose( int fd );
+int syswrite( int fd, void *buff, int bufflen );
+int sysread( int fd, void *buff, int bufflen );
+int sysioctl( int fd, unsigned long command, ... );
+
+
+
 
 
 

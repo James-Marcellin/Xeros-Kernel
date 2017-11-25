@@ -96,3 +96,36 @@ int syswait( int PID ) {
 
 }
 
+/*****************************/
+/* 2.3.1 Signal system calls */
+/*****************************/
+
+int sysopen( int devnum ) {
+
+	return syscall( SYS_OPEN, devnum );
+
+}
+
+int sysclose( int fd ) {
+
+	return syscall( SYS_CLOSE, fd );
+
+}
+
+int syswrite( int fd, void *buff, int bufflen ) {
+
+	return syscall( SYS_WRITE, fd, buff, bufflen );
+
+}
+
+int sysread( int fd, void *buff, int bufflen ) {
+
+	return syscall( SYS_READ, fd, buff, bufflen );
+
+}
+
+int sysioctl( int fd, unsigned long command, ... ) {
+
+	return syscall( SYS_IOCTL, fd, command );
+
+}
