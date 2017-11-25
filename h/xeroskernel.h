@@ -73,13 +73,35 @@ void           outb(unsigned int, unsigned char);
 #define SYS_GETPID      144
 #define SYS_PUTS        155
 #define SYS_SLEEP       166
-#define SYS_KILL        177
 #define SYS_CPUTIMES    178
+
+/***********************/
+/* 2.3 related defines */
+/***********************/
+#define STATE_WAIT		24
+
+#define SYS_SIGHANDLER	160
+#define SYS_SIGRETURN	170
+#define SYS_KILL		177
+#define SYS_WAIT		180
+
+/***********************/
+/* 2.4 related defines */
+/***********************/
+#define SYS_OPEN		44
+#define SYS_CLOSE		55
+#define SYS_WRITE		66
+#define SYS_READ		77
+#define SYS_IOCTL		88
+
 
 /* Structure to track the information associated with a single process */
 
+typedef void (*funcptr)(void);
+
 typedef struct signalEntry {
-    funcptr handler;
+    funcptr	   handler;
+	funcptr	  *oldhandler;
 } signalEntry;
 
 
@@ -93,8 +115,8 @@ struct struct_pcb {
   int          ret;    /* Return value of system call             */
                        /* if process interrupted because of system*/
                        /* call                                    */
-  signalEntry signalTable[32];
-  int         signalsWaiting;
+  signalEntry  signalTable[32];
+  int          signalsWaiting;
   long         args;   
   unsigned int otherpid;
   void        *buffer;
@@ -105,7 +127,7 @@ struct struct_pcb {
 
 typedef struct signal_stack {
     unsigned int ret;
-    funcptr handler;
+    funcptr	   	 handler;
     unsigned int esp;
     unsigned int old_sp;
     int ignoreSignalMask;
@@ -178,11 +200,33 @@ void         sysstop( void );
 unsigned int sysgetpid( void );
 unsigned int syssleep(unsigned int);
 void         sysputs(char *str);
-int          syskill(int pcb);
 int          sysgetcputimes(processStatuses *ps);
+
 
 /* Keyboard */
 unsigned int kbtoa( unsigned char code );
+
+/**************************/
+/* 2.3 related prototypes */
+/**************************/
+int		syssighandler( int signal, void (*newhandler)(void *), void (** oldHandler)(void *) );
+void	syssigreturn( void *old_sp );
+int		syskill( int PID, int signalNumber );
+int		syswait( int PID );
+
+void sigtramp(void (*handler)(void *), void *cntx);
+int signal(int pid, int sig_num);
+
+pcb		*getProcess( int pid );
+
+/**************************/
+/* 2.4 related prototypes */
+/**************************/
+int sysopen( int devnum );
+int sysclose( int fd );
+int syswrite( int fd, void *buff, int bufflen );
+int sysread( int fd, void *buff, int bufflen );
+int sysioctl( int fd, unsigned long command, ... );
 
 
 /* The initial process that the system creates and schedules */

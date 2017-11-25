@@ -64,10 +64,68 @@ unsigned int syssleep( unsigned int t ) {
     return syscall( SYS_SLEEP, t );
 }
 
-int syskill(int pid) {
-  return syscall(SYS_KILL, pid);
-}
-
 int sysgetcputimes(processStatuses *ps) {
   return syscall(SYS_CPUTIMES, ps);
+}
+
+/*****************************/
+/* 2.3.1 Signal system calls */
+/*****************************/
+
+int syssighandler( int signal, void (*newhandler)(void *), void (** oldhandler)(void *) ) {
+
+	return syscall( SYS_SIGHANDLER, signal, newhandler, oldhandler );
+
+}
+
+void syssigreturn( void *old_sp ) {
+
+	syscall( SYS_SIGRETURN, old_sp );
+
+}
+
+int syskill( int PID, int signalNumber ) {
+
+	return syscall( SYS_KILL, PID, signalNumber );
+
+}
+
+int syswait( int PID ) {
+
+	return syscall( SYS_WAIT, PID );
+
+}
+
+/*****************************/
+/* 2.3.1 Signal system calls */
+/*****************************/
+
+int sysopen( int devnum ) {
+
+	return syscall( SYS_OPEN, devnum );
+
+}
+
+int sysclose( int fd ) {
+
+	return syscall( SYS_CLOSE, fd );
+
+}
+
+int syswrite( int fd, void *buff, int bufflen ) {
+
+	return syscall( SYS_WRITE, fd, buff, bufflen );
+
+}
+
+int sysread( int fd, void *buff, int bufflen ) {
+
+	return syscall( SYS_READ, fd, buff, bufflen );
+
+}
+
+int sysioctl( int fd, unsigned long command, ... ) {
+
+	return syscall( SYS_IOCTL, fd, command );
+
 }

@@ -22,6 +22,15 @@ void     dispatch( void ) {
     char        *str;
     int         len;
 
+	int			pid;
+	int			signum;
+	pcb			*temp_p;
+	int			devnum;
+	int			fd;
+	void*		buff;
+	int			bufflen;
+
+
     for( p = next(); p; ) {
       //      kprintf("Process %x selected stck %x\n", p, p->esp);
 
@@ -31,7 +40,7 @@ void     dispatch( void ) {
         ap = (va_list)p->args;
         fp = (funcptr)(va_arg( ap, int ) );
         stack = va_arg( ap, int );
-	p->ret = create( fp, stack );
+		p->ret = create( fp, stack );
         break;
       case( SYS_YIELD ):
         ready( p );
@@ -41,37 +50,129 @@ void     dispatch( void ) {
         p->state = STATE_STOPPED;
         p = next();
         break;
-      case ( SYS_KILL ):
-        ap = (va_list)p->args;
-	p->ret = kill(p, va_arg( ap, int ) );
-	break;
       case (SYS_CPUTIMES):
-	ap = (va_list) p->args;
-	p->ret = getCPUtimes(p, va_arg(ap, processStatuses *));
-	break;
+		ap = (va_list) p->args;
+		p->ret = getCPUtimes(p, va_arg(ap, processStatuses *));
+		break;
       case( SYS_PUTS ):
-	  ap = (va_list)p->args;
-	  str = va_arg( ap, char * );
-	  kprintf( "%s", str );
-	  p->ret = 0;
-	  break;
+		ap = (va_list)p->args;
+		str = va_arg( ap, char * );
+		kprintf( "%s", str );
+		p->ret = 0;
+		break;
       case( SYS_GETPID ):
-	p->ret = p->pid;
-	break;
+		p->ret = p->pid;
+		break;
       case( SYS_SLEEP ):
-	ap = (va_list)p->args;
-	len = va_arg( ap, int );
-	sleep( p, len );
-	p = next();
-	break;
+		ap = (va_list)p->args;
+		len = va_arg( ap, int );
+		sleep( p, len );
+		p = next();
+		break;
       case( SYS_TIMER ):
-	tick();
-	//kprintf("T");
-	p->cpuTime++;
-	ready( p );
-	p = next();
-	end_of_intr();
-	break;
+		tick();
+		//kprintf("T");
+		p->cpuTime++;
+		ready( p );
+		p = next();
+		end_of_intr();
+		break;
+
+/************************/
+/* 2.3 syscall handling */
+/************************/
+
+      case ( SYS_SIGHANDLER ):
+        ap = (va_list) p->args;
+		signum = va_arg( ap, int );
+		funcptr  newhandler = (funcptr)( va_arg( ap, int ) );
+		funcptr* oldhandler = (funcptr*)( va_arg( ap, int* ) );
+
+		if( signum < 0  ||
+			signum > 31 ||
+			(funcptr*)oldhandler == (funcptr*)p->signalTable[31].handler ) {
+				kprintf( "invalid signal %d\n", signum );
+				p->ret = -1;
+				break;
+		}
+
+		// (check handler address' validity)
+		// (if invalid, return -2)
+
+		p->signalTable[signum].handler = newhandler;
+		p->signalTable[signum].oldhandler = oldhandler;
+		kprintf( "new handler installed\n" );
+
+		p->ret = 0;
+		break;
+
+      case ( SYS_SIGRETURN ):
+        ap = (va_list) p->args;
+		long old_sp = (long) va_arg( ap, void* );
+
+		p->esp = old_sp;
+		break;
+
+      case ( SYS_KILL ):
+        ap = (va_list) p->args;
+		pid = va_arg( ap, int );
+		signum = va_arg( ap, int );
+
+		if( signum < 0 || signum > 31 ) {
+			kprintf( "invalid signal %d\n", signum );
+			p->ret = -561;
+			break;
+		}
+
+		temp_p = getProcess( pid );
+
+		if( temp_p == NULL ) {
+			kprintf( "target process id %d does not exist\n", pid );
+			p->ret = -512;
+			break;
+		}
+
+		p->ret = signal( pid, signum );
+		kprintf( "signal marked successfully\n" );
+		break;
+
+      case ( SYS_WAIT ):
+        ap = (va_list) p->args;
+		pid = va_arg( ap, int );
+		p->ret = kill( p, pid );
+		p = next();
+		break;
+
+/************************/
+/* 2.3 syscall handling */
+/************************/
+
+      case ( SYS_OPEN ):
+		ap = (va_list) p->args;
+		devnum = va_arg( ap, int );
+		p->ret = di_open( p, devnum );
+		break;
+
+      case ( SYS_CLOSE ):
+		ap = (va_list) p->args;
+		fd = va_arg( ap, int );
+		p->ret = di_close( p, fd );
+		break;
+
+      case ( SYS_WRITE ):
+		ap = (va_list) p->args;
+		
+		break;
+
+      case ( SYS_READ ):
+		ap = (va_list) p->args;
+		break;
+
+      case ( SYS_IOCTL ):
+		ap = (va_list) p->args;
+		break;
+
+
       default:
         kprintf( "Bad Sys request %d, pid = %d\n", r, p->pid );
       }
@@ -295,4 +396,24 @@ int getCPUtimes(pcb *p, processStatuses *ps) {
   }
 
   return currentSlot;
+}
+
+// code grabed from our a2 assignment to our own convenience
+extern pcb *getProcess( int pid ) {
+
+	pcb *p;
+
+	// loop through our process list, return the process if found
+	for( int i = 0; i < MAX_PROC; i++ ) {
+		if( proctab[i].pid == pid ) {
+			kprintf( "process found\n" );
+			p = &proctab[i];
+			return p;
+		}
+	}
+
+	// return NULL if there are no process at all, or if no process with such PID exists
+	kprintf( "process with requested pid doesn't exist\n" );
+	return NULL;
+
 }
