@@ -28,7 +28,7 @@ int signal(int pid, int sig_num) {
     
     unsigned int stackPosition = process->esp;
     stackPosition -= sizeof(signal_stack);
-    signal_stack* signalStack = (signal_stack*)(stackPos);
+    signal_stack* signalStack = (signal_stack*)(stackPosition);
     signalStack->handler = handler;
     signalStack->esp = old_sp;
     signalStack->ret = process->ret;

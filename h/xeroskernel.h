@@ -181,6 +181,9 @@ void         sysputs(char *str);
 int          syskill(int pcb);
 int          sysgetcputimes(processStatuses *ps);
 
+/* Keyboard */
+unsigned int kbtoa( unsigned char code );
+
 
 /* The initial process that the system creates and schedules */
 void     root( void );
