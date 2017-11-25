@@ -231,6 +231,10 @@ unsigned int syssleep(unsigned int);
 void         sysputs(char *str);
 int          sysgetcputimes(processStatuses *ps);
 
+
+/* Keyboard */
+unsigned int kbtoa( unsigned char code );
+
 /**************************/
 /* 2.3 related prototypes */
 /**************************/
