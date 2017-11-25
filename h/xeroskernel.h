@@ -94,43 +94,72 @@ void           outb(unsigned int, unsigned char);
 #define SYS_READ		77
 #define SYS_IOCTL		88
 
+/*******************/
+/* keyboard number */
+/*******************/
+#define KBD_NON_ECHO	0
+#define KBD_ECHO		1
+
 
 /* Structure to track the information associated with a single process */
 
 typedef void (*funcptr)(void);
 
+typedef struct device_function {
+  int			dvnum;
+  int			dvminornum;
+  char*			dvname;
+  int			(*dvinit)(void);
+  int			(*dvopen)(void);
+  int			(*dvclose)(void);
+  int			(*dvread)(void);
+  int			(*dvwrite)(void);
+  int			(*dvctl)(void);
+} dvfunc;
+
+extern dvfunc	deviceTable[4];
+
+typedef struct file_descriptor {
+  int			majorNum;
+  int			minorNum;
+  dvfunc		device;
+  char*			name;
+  int			status;
+} fdt;
+
 typedef struct signalEntry {
-    funcptr	   handler;
-	funcptr	  *oldhandler;
+  funcptr		handler;
+  funcptr		*oldhandler;
 } signalEntry;
 
 
 typedef struct struct_pcb pcb;
 struct struct_pcb {
-  void        *esp;    /* Pointer to top of saved stack           */
-  pcb         *next;   /* Next process in the list, if applicable */
-  pcb         *prev;   /* Previous proccess in list, if applicable*/
-  int          state;  /* State the process is in, see above      */
-  unsigned int pid;    /* The process's ID                        */
-  int          ret;    /* Return value of system call             */
+  void			*esp;    /* Pointer to top of saved stack           */
+  pcb			*next;   /* Next process in the list, if applicable */
+  pcb			*prev;   /* Previous proccess in list, if applicable*/
+  int			state;  /* State the process is in, see above      */
+  unsigned int	pid;    /* The process's ID                        */
+  int			ret;    /* Return value of system call             */
                        /* if process interrupted because of system*/
                        /* call                                    */
-  signalEntry  signalTable[32];
-  int          signalsWaiting;
-  long         args;   
-  unsigned int otherpid;
-  void        *buffer;
-  int          bufferlen;
-  int          sleepdiff;
-  long         cpuTime;  /* CPU time consumed                     */
+  signalEntry	signalTable[32];
+  int			signalsWaiting;
+  long			args;   
+  unsigned int	otherpid;
+  void			*buffer;
+  int			bufferlen;
+  int			sleepdiff;
+  long			cpuTime;  /* CPU time consumed                     */
+  fdt			fileDescriptorTable[4];		   
 };
 
 typedef struct signal_stack {
-    unsigned int ret;
-    funcptr	   	 handler;
-    unsigned int esp;
-    unsigned int old_sp;
-    int ignoreSignalMask;
+  unsigned int ret;
+  funcptr	   handler;
+  unsigned int esp;
+  unsigned int old_sp;
+  int ignoreSignalMask;
 }signal_stack;
 
 typedef struct struct_ps processStatuses;
@@ -138,7 +167,7 @@ struct struct_ps {
   int  entries;            // Last entry used in the table
   int  pid[MAX_PROC];      // The process ID
   int  status[MAX_PROC];   // The process status
-  long  cpuTime[MAX_PROC]; // CPU time used in milliseconds
+  long cpuTime[MAX_PROC]; // CPU time used in milliseconds
 };
 
 
@@ -210,22 +239,26 @@ void	syssigreturn( void *old_sp );
 int		syskill( int PID, int signalNumber );
 int		syswait( int PID );
 
-void sigtramp(void (*handler)(void *), void *cntx);
-int signal(int pid, int sig_num);
+void	sigtramp(void (*handler)(void *), void *cntx);
+int		signal(int pid, int sig_num);
 
 pcb		*getProcess( int pid );
 
 /**************************/
 /* 2.4 related prototypes */
 /**************************/
-int sysopen( int devnum );
-int sysclose( int fd );
-int syswrite( int fd, void *buff, int bufflen );
-int sysread( int fd, void *buff, int bufflen );
-int sysioctl( int fd, unsigned long command, ... );
+int		sysopen( int dvnum );
+int		sysclose( int fd );
+int		syswrite( int fd, void *buff, int bufflen );
+int		sysread( int fd, void *buff, int bufflen );
+int		sysioctl( int fd, unsigned long command, ... );
 
-
-
+void	di_init( void );
+int		di_open( pcb* p, int dvnum );
+int		di_close( pcb* p, int fd );
+int		di_write( int fd, void *buff, int bufflen );
+int		di_read( int fd, void *buff, int bufflen );
+int		di_ioctl( int fd, unsigned long command, ... );
 
 
 

@@ -57,6 +57,9 @@ void initproc( void )				/* The beginning */
   
   contextinit();
   kprintf("context inited\n");
+
+  di_init();
+  kprintf("DII calls inited\n");
   
 
   // WARNING THE FIRST PROCESS CREATED MUST BE THE IDLE PROCESS.

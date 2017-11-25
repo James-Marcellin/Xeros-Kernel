@@ -14,21 +14,22 @@ static pcb      *tail = NULL;
 void     dispatch( void ) {
 /********************************/
 
-    pcb         *p;
-    int         r;
-    funcptr     fp;
-    int         stack;
-    va_list     ap;
-    char        *str;
-    int         len;
+    pcb				*p;
+    int				r;
+    funcptr			fp;
+    int				stack;
+    va_list			ap;
+    char			*str;
+    int				len;
 
-	int			pid;
-	int			signum;
-	pcb			*temp_p;
-	int			devnum;
-	int			fd;
-	void*		buff;
-	int			bufflen;
+	int				pid;
+	int				signum;
+	pcb*			temp_p;
+	int				dvnum;
+	int				fd;
+	void*			buff;
+	int				bufflen;
+	unsigned long	command;
 
 
     for( p = next(); p; ) {
@@ -149,27 +150,42 @@ void     dispatch( void ) {
 
       case ( SYS_OPEN ):
 		ap = (va_list) p->args;
-		devnum = va_arg( ap, int );
-		p->ret = di_open( p, devnum );
+		dvnum = va_arg( ap, int );
+
+		p->ret = di_open( p, dvnum );
 		break;
 
       case ( SYS_CLOSE ):
 		ap = (va_list) p->args;
 		fd = va_arg( ap, int );
+
 		p->ret = di_close( p, fd );
 		break;
 
       case ( SYS_WRITE ):
 		ap = (va_list) p->args;
-		
+		fd = va_arg( ap, int );
+		buff = va_arg( ap, void* );
+		bufflen = va_arg( ap, int );
+
+		p->ret = di_write( fd, buff, bufflen );
 		break;
 
       case ( SYS_READ ):
 		ap = (va_list) p->args;
+		fd = va_arg( ap, int );
+		buff = va_arg( ap, void* );
+		bufflen = va_arg( ap, int );
+
+		p->ret = di_read( fd, buff, bufflen );
 		break;
 
       case ( SYS_IOCTL ):
 		ap = (va_list) p->args;
+		fd = va_arg( ap, int );
+		command = va_arg( ap, unsigned long );
+
+		p->ret = di_ioctl( fd, command );
 		break;
 
 
