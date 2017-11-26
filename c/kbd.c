@@ -45,7 +45,7 @@ extern int kbdclose(pcb* process, dvfunc* device, int dvnum) {
 }
 
 // writes are not supported by keyboards, return -1 automatically
-extern int kbdwrite() {
+extern int kbdwrite( void *buff, int bufflen ) {
     return -1;
 }
 

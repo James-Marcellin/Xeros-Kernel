@@ -116,12 +116,12 @@ typedef struct device_function {
   int			dvnum;
   int			dvminornum;
   char*			dvname;
-  int			(*dvinit)(void);
-  int			(*dvopen)(void);
-  int			(*dvclose)(void);
-  int			(*dvread)(void);
-  int			(*dvwrite)(void);
-  int			(*dvctl)(void);
+  int			(*dvinit)( void*, ... );
+  int			(*dvopen)( void*, ... );
+  int			(*dvclose)( void*, ... );
+  int			(*dvread)( void*, ... );
+  int			(*dvwrite)( void*, ... );
+  int			(*dvctl)( void*, ... );
 } dvfunc;
 
 extern dvfunc	deviceTable[4];
@@ -261,17 +261,17 @@ int		sysread( int fd, void *buff, int bufflen );
 int		sysioctl( int fd, unsigned long command, ... );
 
 void	di_init( void );
-int		di_open( pcb* p, int dvnum );
+int		di_open( pcb* p, int majorNum );
 int		di_close( pcb* p, int fd );
-int		di_write( int fd, void *buff, int bufflen );
-int		di_read( int fd, void *buff, int bufflen );
-int		di_ioctl( int fd, unsigned long command, ... );
+int		di_write( pcb* p, int fd, void *buff, int bufflen );
+int		di_read( pcb* p, int fd, void *buff, int bufflen );
+int		di_ioctl( pcb* p, int fd, unsigned long command, ... );
 
-int kbdopen( pcb* process, dvfunc* device, int dvnum );
-int kbdclose( pcb* process, dvfunc* device, int dvnum );
-int kbdwrite( void );
-int kbdRead( void* buff, unsigned int bufflen );
-int kbdioctl(unsigned long command, char newEofChar);
+int 	kbdopen( pcb* process, dvfunc* device, int dvnum );
+int 	kbdclose( pcb* process, dvfunc* device, int dvnum );
+int 	kbdwrite( void *buff, int bufflen );
+int 	kbdRead( void* buff, unsigned int bufflen );
+int 	kbdioctl(unsigned long command, char newEofChar);
 
 
 
