@@ -267,6 +267,14 @@ int		di_write( int fd, void *buff, int bufflen );
 int		di_read( int fd, void *buff, int bufflen );
 int		di_ioctl( int fd, unsigned long command, ... );
 
+int kbdopen( pcb* process, dvfunc* device, int dvnum );
+int kbdclose( pcb* process, dvfunc* device, int dvnum );
+int kbdwrite( void );
+int kbdRead( void* buff, unsigned int bufflen );
+int kbdioctl(unsigned long command, char newEofChar);
+
+
+
 
 
 /* The initial process that the system creates and schedules */

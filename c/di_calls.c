@@ -6,8 +6,8 @@
 
 Bool invalidFd( int fd );
 
-dvfunc		kbdNonEcho;
-dvfunc		kdbEcho;
+dvfunc*		kbdNonEcho;
+dvfunc*		kbdEcho;
 
 // initializer of di_calls
 // we only have to deal with 2 devices, an echoing keyboard and a non-echoing keyboard
@@ -15,14 +15,14 @@ dvfunc		kdbEcho;
 // and install the corresponding device function codes
 void di_init() {
 
-	kbdNonEcho          = deviceTable[KBD_NON_ECHO];
+	kbdNonEcho          = &deviceTable[KBD_NON_ECHO];
 	kbdNonEcho->dvopen  = (funcptr) kbdopen;
 	kbdNonEcho->dvclose = (funcptr) kbdclose;
 	kbdNonEcho->dvwrite = (funcptr) kbdwrite;
 	kbdNonEcho->dvread  = (funcptr) kbdRead;
 	kbdNonEcho->dvctl   = (funcptr) kbdioctl;
 
-	kbdEcho          = deviceTable[KBD_ECHO];
+	kbdEcho          = &deviceTable[KBD_ECHO];
 	kbdEcho->dvopen  = (funcptr) kbdopen;
 	kbdEcho->dvclose = (funcptr) kbdclose;
 	kbdEcho->dvwrite = (funcptr) kbdwrite;

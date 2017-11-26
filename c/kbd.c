@@ -71,7 +71,7 @@ extern int kbdNonEchoRead(void* buff, unsigned int bufflen) {
 */
 
 
-extern void kbdioctl(unsigned long command, char newEofChar) {
+extern int kbdioctl(unsigned long command, char newEofChar) {
 	if(command == 53){
 	eofChar = newEofChar;
 	return 0;
