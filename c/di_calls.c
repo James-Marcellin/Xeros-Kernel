@@ -31,10 +31,10 @@ void di_init() {
 
 }
 
-int di_open( pcb* p, int dvnum ) {
+int di_open( pcb* p, int majorNum ) {
 
-	dvfunc device = deviceTable[majorNum];
-	int dvnum = p->fileDescriptorTable[dvnum].majorNum;
+	dvfunc* device = &deviceTable[majorNum];
+	int dvnum = p->fileDescriptorTable[majorNum].majorNum;
 
 	return device->dvopen( p, device, dvnum );
 
@@ -56,7 +56,7 @@ int	di_close( pcb* p, int fd ) {
 		kprintf( "targeted device isn't open" );
 	} else {
 
-		dvfunc device = p->fileDescriptorTable[fd].device;
+		dvfunc* device = &p->fileDescriptorTable[fd].device;
 		int dvnum = p->fileDescriptorTable[fd].majorNum;
 
 		return device->dvclose( p, device, dvnum );
@@ -67,7 +67,7 @@ int	di_close( pcb* p, int fd ) {
 
 }
 
-int	di_write( int fd, void *buff, int bufflen ) {
+int	di_write( pcb* p, int fd, void *buff, int bufflen ) {
 
 	if( invalidFd( fd ) ) {
 		kprintf( "invalid fd\n" );
@@ -81,7 +81,7 @@ int	di_write( int fd, void *buff, int bufflen ) {
 
 }
 
-int	di_read( int fd, void *buff, int bufflen ) {
+int	di_read( pcb* p, int fd, void *buff, int bufflen ) {
 
 	if( invalidFd( fd ) ) {
 		kprintf( "invalid fd\n" );
@@ -95,7 +95,7 @@ int	di_read( int fd, void *buff, int bufflen ) {
 
 }
 
-int	di_ioctl( int fd, unsigned long command, ... ) {
+int	di_ioctl( pcb* p, int fd, unsigned long command, ... ) {
 
 	if( invalidFd( fd ) ) {
 		kprintf( "invalid fd\n" );

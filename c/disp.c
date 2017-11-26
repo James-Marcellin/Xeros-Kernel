@@ -194,7 +194,7 @@ void     dispatch( void ) {
 		buff = va_arg( ap, void* );
 		bufflen = va_arg( ap, int );
 
-		p->ret = di_write( fd, buff, bufflen );
+		p->ret = di_write( p, fd, buff, bufflen );
 		break;
 
 	  // handler for sysread system call, which relies on di_calls to communicate with devices
@@ -204,7 +204,7 @@ void     dispatch( void ) {
 		buff = va_arg( ap, void* );
 		bufflen = va_arg( ap, int );
 
-		p->ret = di_read( fd, buff, bufflen );
+		p->ret = di_read( p, fd, buff, bufflen );
 		break;
 
 	  // handler for sysioctl system call, which relies on di_calls to communicate with devices
@@ -213,7 +213,7 @@ void     dispatch( void ) {
 		fd = va_arg( ap, int );
 		command = va_arg( ap, unsigned long );
 
-		p->ret = di_ioctl( fd, command );
+		p->ret = di_ioctl( p, fd, command );
 		break;
 
 
