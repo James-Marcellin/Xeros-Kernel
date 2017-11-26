@@ -3,32 +3,36 @@
 
 #include <xeroskernel.h>
 #include <stdarg.h>
+#include <kbd.h>
 
 
-short ready = isKeyboardDataReady();
 void addCharToBuffer(char character);
 
+short isKeyboardDataReady();
 int ENTERKEY = 0xa;
 dvfunc   deviceTable[4];
 unsigned char Pressed;
 unsigned char keyboardBuffer[4];
 unsigned char eofChar;
-unsigned Bool isEchoing;
+Bool isEchoing;
+
+
+
+
 
 extern int kbdopen(pcb* process, dvfunc* device, int dvnum) {
     kprintf("kbdopen()\n");
     
-    file_descriptor* echoKbd = &process->fileDescriptorTable[KBD_ECHO];
-    file_descriptor* nonEchoKbd = &process->fileDescriptorTable[KBD_NON_ECHO];
+    fdt* echoKbd = &process->fileDescriptorTable[KBD_ECHO];
+    fdt* nonEchoKbd = &process->fileDescriptorTable[KBD_NON_ECHO];
     
-    if (echoKbd->device || nonEchoKbd->device) {
+    if (echoKbd->status || nonEchoKbd->status) {
         kprintf("A device is already open. Returning error\n");
         return -1;
     } else {
         kprintf("Opening keyboard %d (0 = nonecho, 1 = echo)\n", dvnum);
         isEchoing = (Bool) dvnum;
         enable_irq(1,0);
-        process->fileDescriptorTable[dvnum].device = device;
 		process->fileDescriptorTable[dvnum].status = DEVICE_OPENED;
     }
     
@@ -39,8 +43,7 @@ extern int kbdclose(pcb* process, dvfunc* device, int dvnum) {
     kprintf("kbdclose()\n");
     kprintf("Closing keyboard %d (0 = nonecho, 1 = echo)\n", dvnum);
     enable_irq(1,1);
-    process->fileDescriptorTable[dvnum].device = 0;
-	process->fileDescroptorTable[dvnum].status = DEVICE_CLOSED;
+	process->fileDescriptorTable[dvnum].status = DEVICE_CLOSED;
     return 0;
 }
 
@@ -77,7 +80,7 @@ extern int kbdioctl(unsigned long command, char newEofChar) {
 	return 0;
 	}
 	
-	if(command == 55}{
+	if(command == 55){
 	isEchoing = FALSE;
 	return 0;
 	}
@@ -90,7 +93,7 @@ extern int kbdioctl(unsigned long command, char newEofChar) {
 }
 
 extern int kbd_handler() {
-    if(ready) {
+    if(isKeyboardDataReady()) {
         unsigned char fromPort = inb(KBDPORT1);
         unsigned char character = kbtoa(fromPort);
         
@@ -105,9 +108,10 @@ extern int kbd_handler() {
             kprintf("%c", character);
             Pressed = character;
             addCharToBuffer(character);
-    }
+    	}
     
     return 0;
+	}
 }
 // insert character into keyboardBuffer[]
 void addCharToBuffer(char character) {
@@ -120,6 +124,85 @@ void addCharToBuffer(char character) {
 }
 
 
-short isKeyboardDataReady() {
+short isKeyboardDataReady( void ) {
     return (inb(KBDPORT2) & 0x01);
+}
+
+static int extchar( unsigned char code){
+        state &= ~EXTENDED;
+}
+
+unsigned int kbtoa( unsigned char code ){
+  unsigned int    ch;
+  
+  if (state & EXTENDED)
+    return extchar(code);
+  if (code & KEY_UP) {
+    switch (code & 0x7f) {
+    case LSHIFT:
+    case RSHIFT:
+      state &= ~INSHIFT;
+      break;
+    case CAPSL:
+      printf("Capslock off detected\n");
+      state &= ~CAPSLOCK;
+      break;
+    case LCTL:
+      state &= ~INCTL;
+      break;
+    case LMETA:
+      state &= ~INMETA;
+      break;
+    }
+    
+    return NOCHAR;
+  }
+  
+  
+  /* check for special keys */
+  switch (code) {
+  case LSHIFT:
+  case RSHIFT:
+    state |= INSHIFT;
+    printf("shift detected!\n");
+    return NOCHAR;
+  case CAPSL:
+    state |= CAPSLOCK;
+    printf("Capslock ON detected!\n");
+    return NOCHAR;
+  case LCTL:
+    state |= INCTL;
+    return NOCHAR;
+  case LMETA:
+    state |= INMETA;
+    return NOCHAR;
+  case EXTESC:
+    state |= EXTENDED;
+    return NOCHAR;
+  }
+  
+  ch = NOCHAR;
+  
+  if (code < sizeof(kbcode)){
+    if ( state & CAPSLOCK )
+      ch = kbshift[code];
+	  else
+	    ch = kbcode[code];
+  }
+  if (state & INSHIFT) {
+    if (code >= sizeof(kbshift))
+      return NOCHAR;
+    if ( state & CAPSLOCK )
+      ch = kbcode[code];
+    else
+      ch = kbshift[code];
+  }
+  if (state & INCTL) {
+    if (code >= sizeof(kbctl))
+      return NOCHAR;
+    ch = kbctl[code];
+  }
+  if (state & INMETA)
+    ch += 0x80;
+  return ch;
 }

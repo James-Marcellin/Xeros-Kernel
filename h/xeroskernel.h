@@ -273,6 +273,7 @@ int 	kbdwrite( void *buff, int bufflen );
 int 	kbdRead( void* buff, unsigned int bufflen );
 int 	kbdioctl(unsigned long command, char newEofChar);
 
+void enable_irq( unsigned int,  int);
 
 
 
