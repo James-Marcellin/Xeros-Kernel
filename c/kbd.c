@@ -8,7 +8,7 @@
 
 void addCharToBuffer(char character);
 
-short isKeyboardDataReady();
+short isKeyboardDataReady( void );
 int ENTERKEY = 0xa;
 dvfunc   deviceTable[4];
 unsigned char Pressed;
@@ -92,7 +92,7 @@ extern int kbdioctl(unsigned long command, char newEofChar) {
 	return -1;
 }
 
-extern int kbd_handler() {
+extern int kbd_handler( void ) {
     if(isKeyboardDataReady()) {
         unsigned char fromPort = inb(KBDPORT1);
         unsigned char character = kbtoa(fromPort);
@@ -100,18 +100,24 @@ extern int kbd_handler() {
         if ((int) character == eofChar) {
             addCharToBuffer(Pressed);
             kprintf("%c", Pressed);
+			return 0;
         } else if(character == ENTERKEY) {
             Pressed = '\n';
             addCharToBuffer(Pressed);
             kprintf("%c", Pressed);
+			return 0;
         } else if(character) {
             kprintf("%c", character);
             Pressed = character;
             addCharToBuffer(character);
+			return 0;
     	}
     
-    return 0;
+    	return 0;
 	}
+
+	return 0;
+
 }
 // insert character into keyboardBuffer[]
 void addCharToBuffer(char character) {
@@ -128,8 +134,8 @@ short isKeyboardDataReady( void ) {
     return (inb(KBDPORT2) & 0x01);
 }
 
-static int extchar( unsigned char code){
-        state &= ~EXTENDED;
+static int extchar( unsigned char code ){
+	return state &= ~EXTENDED;
 }
 
 unsigned int kbtoa( unsigned char code ){
@@ -144,7 +150,7 @@ unsigned int kbtoa( unsigned char code ){
       state &= ~INSHIFT;
       break;
     case CAPSL:
-      printf("Capslock off detected\n");
+      kprintf("Capslock off detected\n");
       state &= ~CAPSLOCK;
       break;
     case LCTL:
@@ -164,11 +170,11 @@ unsigned int kbtoa( unsigned char code ){
   case LSHIFT:
   case RSHIFT:
     state |= INSHIFT;
-    printf("shift detected!\n");
+    kprintf("shift detected!\n");
     return NOCHAR;
   case CAPSL:
     state |= CAPSLOCK;
-    printf("Capslock ON detected!\n");
+    kprintf("Capslock ON detected!\n");
     return NOCHAR;
   case LCTL:
     state |= INCTL;
