@@ -94,7 +94,10 @@ extern int kbd_handler() {
         unsigned char fromPort = inb(KBDPORT1);
         unsigned char character = kbtoa(fromPort);
         
-        if ((int) character == ENTERKEY) {
+        if ((int) character == eofChar) {
+            addCharToBuffer(Pressed);
+            kprintf("%c", Pressed);
+        } else if(character == ENTERKEY) {
             Pressed = '\n';
             addCharToBuffer(Pressed);
             kprintf("%c", Pressed);
@@ -102,7 +105,6 @@ extern int kbd_handler() {
             kprintf("%c", character);
             Pressed = character;
             addCharToBuffer(character);
-        }
     }
     
     return 0;
