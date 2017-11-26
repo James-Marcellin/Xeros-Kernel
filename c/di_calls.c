@@ -19,14 +19,14 @@ void di_init() {
 	kbdNonEcho->dvopen  = (funcptr) kbdopen;
 	kbdNonEcho->dvclose = (funcptr) kbdclose;
 	kbdNonEcho->dvwrite = (funcptr) kbdwrite;
-	kbdNonEcho->dvread  = (funcptr) kbdNonEchoRead;
+	kbdNonEcho->dvread  = (funcptr) kbdRead;
 	kbdNonEcho->dvctl   = (funcptr) kbdioctl;
 
 	kbdEcho          = deviceTable[KBD_ECHO];
 	kbdEcho->dvopen  = (funcptr) kbdopen;
 	kbdEcho->dvclose = (funcptr) kbdclose;
 	kbdEcho->dvwrite = (funcptr) kbdwrite;
-	kbdEcho->dvread  = (funcptr) kbdEchoRead;
+	kbdEcho->dvread  = (funcptr) kbdRead;
 	kbdEcho->dvctl   = (funcptr) kbdioctl;
 
 }

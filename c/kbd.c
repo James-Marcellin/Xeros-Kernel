@@ -15,7 +15,7 @@ unsigned char Pressed;
 unsigned char keyboardBuffer[4];
 unsigned char eofChar;
 
-extern int kbdopen(pcb* process, devsw* device, int dvnum) {
+extern int kbdopen(pcb* process, dvfunc* device, int dvnum) {
     kprintf("kbdopen()\n");
     
     file_descriptor* echoKbd = &process->fileDescriptorTable[KBD_ECHO];
