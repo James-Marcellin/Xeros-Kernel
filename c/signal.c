@@ -19,7 +19,9 @@ void sigtramp( void (*handler)(void *), void *cntx ) {
 // we don't need to check for the validity of signum anymore because
 // we have already done so in the dispatcher
 int signal(int pid, int signum) {
-        
+
+
+	pcb* process = getProcess(pid);
     int signalsWaiting = process->signalsWaiting;
     
     signalEntry* sig_entry = &process->signalTable[signum];

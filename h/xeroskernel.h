@@ -109,6 +109,7 @@ void           outb(unsigned int, unsigned char);
 
 /* Structure to track the information associated with a single process */
 
+/* A typedef for the signature of the function passed to syscreate */
 typedef void (*funcptr)(void);
 
 typedef struct device_function {
@@ -205,10 +206,6 @@ typedef struct context_frame {
 int      kfree(void *ptr);
 void     kmeminit( void );
 void     *kmalloc( size_t );
-
-
-/* A typedef for the signature of the function passed to syscreate */
-typedef void    (*funcptr)(void);
 
 
 /* Internal functions for the kernel, applications must never  */
