@@ -83,14 +83,21 @@ void     dispatch( void ) {
 /* 2.3 syscall handling */
 /************************/
 
+	  // handler for syssighandler system call
       case ( SYS_SIGHANDLER ):
         ap = (va_list) p->args;
 		signum = va_arg( ap, int );
 		funcptr  newhandler = (funcptr)( va_arg( ap, int ) );
 		funcptr* oldhandler = (funcptr*)( va_arg( ap, int* ) );
 
+		// the code checks if the passed signal is valid OR
+		// if the signal that are previously passed is signal 31 (the highest priority possible)
+		// if so, the signal is considered invalid and we return -1
 		if( signum < 0  ||
 			signum > 31 ||
+			// assume oldhandler were passed correctly
+			// and there exists a previously installed handler for signal 31 and they match
+			// this means we are trying to interrupt signal 31 which we do not allow
 			(funcptr*)oldhandler == (funcptr*)p->signalTable[31].handler ) {
 				kprintf( "invalid signal %d\n", signum );
 				p->ret = -1;
@@ -99,26 +106,37 @@ void     dispatch( void ) {
 
 		// (check handler address' validity)
 		// (if invalid, return -2)
+		// (we are unsure of what to do here...)
 
+		// if the signal is validated and passed, we install the handler
+		// then, assume again the oldhandler were passed correctly, we just set
+		// our oldhandler pointer points to the passed oldhandler.
 		p->signalTable[signum].handler = newhandler;
 		p->signalTable[signum].oldhandler = oldhandler;
 		kprintf( "new handler installed\n" );
 
+		// handler successfully installed, we return 0
 		p->ret = 0;
 		break;
 
+	  // handler to handle syssigreturn system call (should only be used by tramp code)
       case ( SYS_SIGRETURN ):
         ap = (va_list) p->args;
 		long old_sp = (long) va_arg( ap, void* );
 
+		// simply replace the stack pointer to point to the preset old stack pointer
 		p->esp = old_sp;
 		break;
 
+	  // handler to handle syskill system call
+	  // functionality changed to be passing signals instead of killing a process from a2
       case ( SYS_KILL ):
         ap = (va_list) p->args;
 		pid = va_arg( ap, int );
 		signum = va_arg( ap, int );
 
+		// checks if the passed signal number is valid
+		// if the signal is invalid, return -561
 		if( signum < 0 || signum > 31 ) {
 			kprintf( "invalid signal %d\n", signum );
 			p->ret = -561;
@@ -126,17 +144,22 @@ void     dispatch( void ) {
 		}
 
 		temp_p = getProcess( pid );
-
+		
+		// if signal is valid but the target process doesn't exists then we return -512
 		if( temp_p == NULL ) {
 			kprintf( "target process id %d does not exist\n", pid );
 			p->ret = -512;
 			break;
 		}
 
+		// otherwise, the signal marking and delivery takes place
+		// and we'll have signal() to set the return code for us
 		p->ret = signal( pid, signum );
 		kprintf( "signal marked successfully\n" );
 		break;
 
+	  // handler for syswait system call
+	  // terminates the targeted process
       case ( SYS_WAIT ):
         ap = (va_list) p->args;
 		pid = va_arg( ap, int );
@@ -148,6 +171,7 @@ void     dispatch( void ) {
 /* 2.3 syscall handling */
 /************************/
 
+	  // handler for sysopen system call, which relies on di_calls to communicate with devices
       case ( SYS_OPEN ):
 		ap = (va_list) p->args;
 		dvnum = va_arg( ap, int );
@@ -155,6 +179,7 @@ void     dispatch( void ) {
 		p->ret = di_open( p, dvnum );
 		break;
 
+	  // handler for sysclose system call, which relies on di_calls to communicate with devices
       case ( SYS_CLOSE ):
 		ap = (va_list) p->args;
 		fd = va_arg( ap, int );
@@ -162,6 +187,7 @@ void     dispatch( void ) {
 		p->ret = di_close( p, fd );
 		break;
 
+	  // handler for syswrite system call, which relies on di_calls to communicate with devices
       case ( SYS_WRITE ):
 		ap = (va_list) p->args;
 		fd = va_arg( ap, int );
@@ -171,6 +197,7 @@ void     dispatch( void ) {
 		p->ret = di_write( fd, buff, bufflen );
 		break;
 
+	  // handler for sysread system call, which relies on di_calls to communicate with devices
       case ( SYS_READ ):
 		ap = (va_list) p->args;
 		fd = va_arg( ap, int );
@@ -180,6 +207,7 @@ void     dispatch( void ) {
 		p->ret = di_read( fd, buff, bufflen );
 		break;
 
+	  // handler for sysioctl system call, which relies on di_calls to communicate with devices
       case ( SYS_IOCTL ):
 		ap = (va_list) p->args;
 		fd = va_arg( ap, int );
@@ -243,21 +271,6 @@ extern pcb      *next( void ) {
     p->next = NULL;
     p->prev = NULL;
     return( p );
-}
-
-
-extern pcb *findPCB( int pid ) {
-/******************************/
-
-    int	i;
-
-    for( i = 0; i < MAX_PROC; i++ ) {
-        if( proctab[i].pid == pid ) {
-            return( &proctab[i] );
-        }
-    }
-
-    return( NULL );
 }
 
 
@@ -340,7 +353,7 @@ static int  kill(pcb *currP, int pid) {
     return -1;
   }
     
-  if (!(targetPCB = findPCB( pid ))) {
+  if (!(targetPCB = getProcess( pid ))) {
     // kprintf("Target pid not found\n");
     return -1;
   }
@@ -433,3 +446,4 @@ extern pcb *getProcess( int pid ) {
 	return NULL;
 
 }
+

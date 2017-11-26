@@ -7,18 +7,18 @@
 
 /* Your code goes here */
 
-void sigtramp(void (*handler)(void *), void *cntx){	
+void sigtramp( void (*handler)(void *), void *cntx ) {
+
 	context_frame* cFrame = (context_frame*) cntx;
 	handler(cFrame);
-	syssigreturn(cFrame);
-	}
-	
+	syssigreturn(cFrame->esp);
+
+}
+
+// actual signal delivery code
+// we don't need to check for the validity of signum anymore because
+// we have already done so in the dispatcher
 int signal(int pid, int signum) {
-
-    if (signum < 0 || signum > 31) return -2;
-
-	pcb* process = getProcess(pid);	
-	if (!process) return -1;
         
     int signalsWaiting = process->signalsWaiting;
     
@@ -43,7 +43,7 @@ int signal(int pid, int signum) {
     CF->eflags = 0x00003200;    
         
     process->esp = stackPosition;
-    
-    
+        
     return 0;
-	}
+
+}

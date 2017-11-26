@@ -1,4 +1,4 @@
-/* di_calls.c : DII calls
+/* di_calls.c : Device Independant Calls
  */
 
 #include <xeroskernel.h>
@@ -9,6 +9,10 @@ Bool invalidFd( int fd );
 dvfunc		kbdNonEcho;
 dvfunc		kdbEcho;
 
+// initializer of di_calls
+// we only have to deal with 2 devices, an echoing keyboard and a non-echoing keyboard
+// the initializer will register the devices into the device table
+// and install the corresponding device function codes
 void di_init() {
 
 	kbdNonEcho          = deviceTable[KBD_NON_ECHO];
@@ -36,10 +40,20 @@ int di_open( pcb* p, int dvnum ) {
 
 }
 
+/*	di_calls beyond this point follows the implementation pattern:
+		- check if fd is valid and if the corresponding device is opened
+		- using fd from the process to determines the index	of the device in the device table
+		  then from there determines the function to call
+		- calls the function
+		- determine the meaning of the return value of the DII call.
+*/
+
 int	di_close( pcb* p, int fd ) {
 
 	if( invalidFd( fd ) ) {
-		return -1;
+		kprintf( "invalid fd\n" );
+	} else if( p->fileDescriptorTable[fd].status != DEVICE_OPENED ) {
+		kprintf( "targeted device isn't open" );
 	} else {
 
 		dvfunc device = p->fileDescriptorTable[fd].device;
@@ -49,35 +63,49 @@ int	di_close( pcb* p, int fd ) {
 
 	}
 
+	return -1;
+
 }
 
 int	di_write( int fd, void *buff, int bufflen ) {
 
 	if( invalidFd( fd ) ) {
-		return -1;
+		kprintf( "invalid fd\n" );
+	} else if( p->fileDescriptorTable[fd].status != DEVICE_OPENED ) {
+		kprintf( "targeted device isn't open" );
 	} else {
 		return deviceTable[fd].dvwrite( buff, bufflen );
 	}
+
+	return -1;
 
 }
 
 int	di_read( int fd, void *buff, int bufflen ) {
 
 	if( invalidFd( fd ) ) {
-		return -1;
+		kprintf( "invalid fd\n" );
+	} else if( p->fileDescriptorTable[fd].status != DEVICE_OPENED ) {
+		kprintf( "targeted device isn't open" );
 	} else {
 		return deviceTable[fd].dvread( buff, bufflen );
 	}
+
+	return -1;
 
 }
 
 int	di_ioctl( int fd, unsigned long command, ... ) {
 
 	if( invalidFd( fd ) ) {
-		return -1;
+		kprintf( "invalid fd\n" );
+	} else if( p->fileDescriptorTable[fd].status != DEVICE_OPENED ) {
+		kprintf( "targeted device isn't open" );
 	} else {
 		return deviceTable[fd].dvctl( command );
 	}
+
+	return -1;
 
 }
 

@@ -100,6 +100,12 @@ void           outb(unsigned int, unsigned char);
 #define KBD_NON_ECHO	0
 #define KBD_ECHO		1
 
+/*********************/
+/* device status code*/
+/*********************/
+#define DEVICE_CLOSED	0
+#define DEVICE_OPENED	1
+
 
 /* Structure to track the information associated with a single process */
 
@@ -155,11 +161,11 @@ struct struct_pcb {
 };
 
 typedef struct signal_stack {
-  unsigned int ret;
-  funcptr	   handler;
-  unsigned int esp;
-  unsigned int old_sp;
-  int ignoreSignalMask;
+  unsigned int	ret;
+  funcptr		handler;
+  unsigned int	esp;
+  unsigned int	old_sp;
+  int			ignoreSignalMask;
 }signal_stack;
 
 typedef struct struct_ps processStatuses;

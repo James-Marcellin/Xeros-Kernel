@@ -28,6 +28,7 @@ extern int kbdopen(pcb* process, devsw* device, int dvnum) {
         kprintf("Opening keyboard %d (0 = nonecho, 1 = echo)\n", dvnum);
         enable_irq(1,0);
         process->fileDescriptorTable[dvnum].device = device;
+		process->fileDescriptorTable[dvnum].status = DEVICE_OPENED;
     }
     
     return 0;
@@ -38,9 +39,11 @@ extern int kbdclose(pcb* process, devsw* device, int dvnum) {
     kprintf("Closing keyboard %d (0 = nonecho, 1 = echo)\n", dvnum);
     enable_irq(1,1);
     process->fileDescriptorTable[dvnum].device = 0;
+	process->fileDescroptorTable[dvnum].status = DEVICE_CLOSED;
     return 0;
 }
 
+// writes are not supported by keyboards, return -1 automatically
 extern int kbdwrite() {
     return -1;
 }
