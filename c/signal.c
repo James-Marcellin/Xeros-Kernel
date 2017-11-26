@@ -22,13 +22,12 @@ int signal(int pid, int signum) {
 
 
 	pcb* process = getProcess(pid);
-    int signalsWaiting = process->signalsWaiting;
     
     signalEntry* sig_entry = &process->signalTable[signum];
     funcptr handler = (funcptr)(sig_entry->handler);
-    long old_sp = process->esp;
+    unsigned long old_sp = (unsigned long) process->esp;
     
-    unsigned int stackPosition = process->esp;
+    unsigned long stackPosition = (unsigned long) process->esp;
     stackPosition -= sizeof(signal_stack);
     signal_stack* signalStack = (signal_stack*)(stackPosition);
     signalStack->handler = handler;
@@ -43,7 +42,7 @@ int signal(int pid, int signum) {
     CF->iret_eip = &sigtramp;
     CF->iret_cs = getCS();
     CF->eflags = 0x00003200;    
-        
+
     process->esp = stackPosition;
         
     return 0;
