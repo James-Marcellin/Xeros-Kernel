@@ -75,6 +75,8 @@ void initproc( void )				/* The beginning */
   kprintf("Creating Idle Process\n");
 
   create(idleproc, PROC_STACK);
+
+  create( test, PROC_STACK );
   
   create( root, PROC_STACK );
   kprintf("create inited\n");
