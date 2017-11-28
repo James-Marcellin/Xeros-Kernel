@@ -19,6 +19,7 @@ void test( void ) {
 
 //	1. showing prioritization and signal intterupting each other
 	
+	
 //	2. syssighandler() test
 	syssighandlerTest = syssighandler(32, NULL, NULL);
 	kprintf( "syssighandler test result returns %d, expecting -1\n", syssighandlerTest );
@@ -46,7 +47,7 @@ void test( void ) {
 //	7. sysioctl() test with invalid commands
 	sysopenTest = sysopen( 0 );
 	sysioctlTest = sysioctl( 0, 666 );
-	kprintf( "sysopen test result returns %d, expecting 1\n", sysopenTest );
+	kprintf( "sysopen test result returns %d, expecting 0\n", sysopenTest );
 	kprintf( "sysioctl test result returns %d, expecting -1\n", sysioctlTest );
 
 //	8. sysread() when there are more characters buffered in kernal than read request
