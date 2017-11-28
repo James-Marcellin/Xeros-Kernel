@@ -100,9 +100,9 @@ int syswait( int PID ) {
 /* 2.3.1 Signal system calls */
 /*****************************/
 
-int sysopen( int devnum ) {
+int sysopen( int dvnum ) {
 
-	return syscall( SYS_OPEN, devnum );
+	return syscall( SYS_OPEN, dvnum );
 
 }
 

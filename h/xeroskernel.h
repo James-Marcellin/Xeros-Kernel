@@ -124,7 +124,7 @@ typedef struct device_function {
   int			(*dvctl)( void*, ... );
 } dvfunc;
 
-extern dvfunc	deviceTable[4];
+extern dvfunc	deviceTable[2];
 
 typedef struct file_descriptor {
   int			majorNum;
@@ -274,7 +274,7 @@ int 	kbdwrite( void *buff, int bufflen );
 int 	kbdRead( void* buff, unsigned int bufflen );
 int 	kbdioctl(unsigned long command, char newEofChar);
 
-void enable_irq( unsigned int,  int);
+void 	enable_irq( unsigned int,  int);
 
 
 
