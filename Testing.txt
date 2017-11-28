@@ -1,9 +1,145 @@
+NOTE: Tab width of 4 is required for less than 80 character line width
 
-This file is to include your testing documentation. The file is to be
-in plain text ASCII and properly spaced and edited so that when it is
-viewed on a Linux machine it is readable. Not all ASCII files created
-on a Windows machine display as expected due to the differences with
-respect to how new lines and carriage returns are treated. Line widths
-are to be limited to 80 characters.
+Test #1: Test showing prioritization and signals interrupting each other
+
+What is being tested:
+
+Testing code:
+
+Test output:
+
+Test Passed:
+_______________________________________________________________________________
+Test #2: syssighandler() test case
+What is being tested: trying to run syssighandler with an invalid signal number
+signal must be i [0,31] so we are going to call syssighandler with signal
+number 32
+
+Testing code:
+	syssighandlerTest = syssighandler(32, NULL, NULL);
+	kprintf( "syssighandler test result returns %d, expecting -1\n", 
+	syssighandlerTest );
+Test output: 
+	syssighandler test result returns -1, expecting -1
+
+Test Passed: ?
+
+_______________________________________________________________________________
+Test #3: syskill() test case
+What is being tested: trying to syskill with an invalid signal number 2525
+where signal numbers must be [0,31]
+
+Testing code:
+	syskillTest = syskill( 0, 2525 );
+	kprintf( "syskill test result returns %d, expecting -561\n", syskillTest );
 
 
+Test output: 
+	syskill test result returns -561, expecting -561
+
+Test Passed: ?
+
+_______________________________________________________________________________
+Test #4: syswait() test case
+What is being tested: Syswait for a process that does not exist (pid
+MAX_PROC + 1)
+
+Testing code:
+	syswaitTest = syswait( MAX_PROC + 1 );
+	kprintf( "syswait test result returns %d, expecting -1\n", syswaitTest );
+
+Test output: 
+	syswait test result returns -1, expecting -1
+
+Test Passed: ?
+
+_______________________________________________________________________________
+
+Test #5: sysopen() with invalid arguments
+What is being tested: A sysopen call with device number 5, but we only have
+devices 0 and 1.
+
+Testing code:
+sysopenTest = sysopen( 5 );
+	kprintf("sysopen test result returns %d, expecting -1\n", sysopenTest);
+	
+Test output: 
+	sysopen test result returns -1, expecting -1 
+(TODO: actually run)
+
+Test Passed: ?
+
+_______________________________________________________________________________
+
+Test #6: syswrite() with invalid file descriptor
+What is being tested: a syswrite call with an file descriptor of -1 being
+passed, where as a valid file discriptor is in [0,3]
+
+Testing code:
+	int buffer = 4;
+	int *writeTestData = &buffer;
+
+	syswriteTest = syswrite( -1, writeTestData, sizeof(int) );
+	kprintf( "syswrite test result returns %d, expecting -1\n", syswriteTest );
+	
+Test output: 
+	syswrite test result returns -1, expecting -1 
+(TODO: actually run)
+
+Test Passed: ?
+
+_______________________________________________________________________________
+Test #7: sysioctl() test for invalid commands
+What is being tested: a sysioctl call with command 666 to a keyboard
+
+Testing code:
+	sysopenTest = sysopen( 0 );
+	sysioctlTest = sysioctl( 0, 666 );
+	kprintf( "sysioctl test result returns %d, expecting -1\n", sysioctlTest );
+	
+Test output: 
+	sysioctl test result returns -1, expecting -1
+(TODO: actually run)
+
+Test Passed: ?
+
+_______________________________________________________________________________
+Test #8: sysread() when there are more characters buffered in kernel than 
+the read requests.
+What is being tested:
+
+Testing code:
+
+Test output:
+
+Test Passed:
+
+_______________________________________________________________________________
+Test #9:  First test cases for scenario not covered here or in 
+the test program.
+What is being tested: Syskill with an invalid pid MAX_PROC+1, where pid must
+be in [0,MAX_PROC]
+
+Testing code:
+	syskillTest = syskill( MAX_PROC+1, 5 );
+	kprintf( "syskill test result returns %d, expecting -512\n", syskillTest );
+
+Test output: 
+	syskill test result returns -512, expecting -512
+
+Test Passed: ?
+
+_______________________________________________________________________________
+Test #10: Second test cases for scenario not covered here or in 
+the test program.
+What is being tested: Process tries to syskill itself by passing its own pid
+to syskill
+
+Testing code:
+	syswaitTest = syswait( myPID );
+	kprintf( "syswait test result returns %d, expecting -2\n", syswaitTest );
+
+Test output: 
+	syswait test result returns -2, expecting -2
+
+Test Passed: ?
