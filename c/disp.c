@@ -164,7 +164,6 @@ void     dispatch( void ) {
         ap = (va_list) p->args;
 		pid = va_arg( ap, int );
 		p->ret = kill( p, pid );
-		p = next();
 		break;
 
 /************************/
@@ -343,6 +342,10 @@ static int  kill(pcb *currP, int pid) {
   
   if (pid == currP->pid) {   // Trying to kill self
     return -2;
+  }
+
+  if (pid < 0 || pid > MAX_PROC ) {
+	return -1;
   }
 
   // Don't let it kill the idle process, which from the user side
