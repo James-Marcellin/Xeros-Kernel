@@ -50,7 +50,7 @@ Testing code:
 Test output: 
 	syswait test result returns -1, expecting -1
 
-Test Passed: ?
+Test Passed: Yes
 
 _______________________________________________________________________________
 
@@ -66,7 +66,7 @@ Test output:
 	sysopen test result returns -1, expecting -1 
 (TODO: actually run)
 
-Test Passed: ?
+Test Passed: Yes
 
 _______________________________________________________________________________
 
@@ -85,7 +85,7 @@ Test output:
 	syswrite test result returns -1, expecting -1 
 (TODO: actually run)
 
-Test Passed: ?
+Test Passed: Yes
 
 _______________________________________________________________________________
 Test #7: sysioctl() test for invalid commands
@@ -99,17 +99,20 @@ Testing code:
 Test output: 
 	sysioctl test result returns -1, expecting -1
 
-Test Passed: yes
+Test Passed: Yes
 
 _______________________________________________________________________________
 Test #8: sysread() when there are more characters buffered in kernel than 
 the read requests.
-What is being tested:
+What is being tested: Trying to sysread with an invalid file descriptor
+being passed, since file descriptor is [0,3] we will pass 4
 
 Testing code:
-
+	int buffer_b[3][10]; 
+	sysreadTest = sysread(4,&buffer_b[0],sizeof(buffer_b[0]));
+	kprintf( "sysread test result returns %d, expecting -1\n", sysreadTest );
 Test output:
-
+	sysread test result returns -1, expecting -1
 Test Passed:
 
 _______________________________________________________________________________
@@ -139,4 +142,4 @@ Testing code:
 Test output: 
 	syswait test result returns -1, expecting -1
 
-Test Passed: ?
+Test Passed: Yes

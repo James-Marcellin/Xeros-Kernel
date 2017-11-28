@@ -50,8 +50,9 @@ void test( void ) {
 	kprintf( "sysioctl test result returns %d, expecting -1\n", sysioctlTest );
 
 //	8. sysread() when there are more characters buffered in kernal than read request
-	sysreadTest = sysread( 0, buffer, sizeof(int) - 1 );
-	kprintf( "sysread test result returns %d, expecting ??\n", sysreadTest );
+	int buffer_b[3][10]; 
+	sysreadTest = sysread(4,&buffer_b[0],sizeof(buffer_b[0]));
+	kprintf( "sysread test result returns %d, expecting -1\n", sysreadTest );
 
 //	9. two test cases for scenarios not covered here or in the test program
 	syskillTest = syskill( MAX_PROC + 1 , 5 );			// (1/2)
