@@ -20,6 +20,8 @@ void test( void ) {
 //	1. showing prioritization and signal intterupting each other
 	
 //	2. syssighandler() test
+	syssighandlerTest = syssighandler(32, NULL, NULL);
+	kprintf( "syssighandler test result returns %d, expecting -1\n", syssighandlerTest );
 
 //	3. syskill() test
 	syskillTest = syskill( 0, 2525 );
@@ -83,7 +85,6 @@ void     root( void ) {
 
 	char ps[2] = { 'p', 's' };
 	char ex[2] = { 'e', 'x' };
-	char EOF = ;
 	char K = 'k';
 	char A = 'a';
 	char T = 't';
@@ -120,21 +121,22 @@ void     root( void ) {
 	
 			sysclose( 1 );
 
-			for( int i = 0, i < 6, i++ ) {
+			for( int i = 0; i < 6; i++ ) {
 				if( input[i] != user[i] ) {
 					auth = FALSE;
 					break;
 				}
 			}
 
-			for( int i = 0, i < 16, i++ ) {
+			for( int i = 0; i < 16; i++ ) {
 				if( pass[i] != password[i] ) {
 					auth = FALSE;
 					break;
 				}
 			}
 
-		} while( !auth );
+		} while(!auth);
+
 
 /*
 	NOTE: code from here on is the shell program

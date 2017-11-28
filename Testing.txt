@@ -22,7 +22,7 @@ Testing code:
 Test output: 
 	syssighandler test result returns -1, expecting -1
 
-Test Passed: ?
+Test Passed: Yes
 
 _______________________________________________________________________________
 Test #3: syskill() test case
@@ -37,15 +37,14 @@ Testing code:
 Test output: 
 	syskill test result returns -561, expecting -561
 
-Test Passed: ?
+Test Passed: Yes
 
 _______________________________________________________________________________
 Test #4: syswait() test case
-What is being tested: Syswait for a process that does not exist (pid
-MAX_PROC + 1)
+What is being tested: Syswait on the idle process
 
 Testing code:
-	syswaitTest = syswait( MAX_PROC + 1 );
+	syswaitTest = syswait( 0 );
 	kprintf( "syswait test result returns %d, expecting -1\n", syswaitTest );
 
 Test output: 
@@ -99,9 +98,8 @@ Testing code:
 	
 Test output: 
 	sysioctl test result returns -1, expecting -1
-(TODO: actually run)
 
-Test Passed: ?
+Test Passed: yes
 
 _______________________________________________________________________________
 Test #8: sysread() when there are more characters buffered in kernel than 
@@ -127,19 +125,18 @@ Testing code:
 Test output: 
 	syskill test result returns -512, expecting -512
 
-Test Passed: ?
+Test Passed: Yes
 
 _______________________________________________________________________________
 Test #10: Second test cases for scenario not covered here or in 
 the test program.
-What is being tested: Process tries to syskill itself by passing its own pid
-to syskill
+What is being tested: Process tries to syswait a process that doesnt exist
 
 Testing code:
-	syswaitTest = syswait( myPID );
-	kprintf( "syswait test result returns %d, expecting -2\n", syswaitTest );
+	syswaitTest = syswait( MAX_PROC + 1 );
+	kprintf( "syswait test result returns %d, expecting -1\n", syswaitTest );
 
 Test output: 
-	syswait test result returns -2, expecting -2
+	syswait test result returns -1, expecting -1
 
 Test Passed: ?
