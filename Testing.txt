@@ -2,13 +2,16 @@ NOTE: Tab width of 4 is required for less than 80 character line width
 
 Test #1: Test showing prioritization and signals interrupting each other
 
-What is being tested:
+What is being tested: Two succesive calls of syskill() to two seperate
+processes, and then we check the previous signal to see that it was
+sig 3 because sig 7 should have ran first as it's a higher priority
 
 Testing code:
+	Not implemented as we couldnt get previous signal working
 
 Test output:
-
-Test Passed:
+	N/A
+Test Passed:No
 _______________________________________________________________________________
 Test #2: syssighandler() test case
 What is being tested: trying to run syssighandler with an invalid signal number
@@ -113,7 +116,7 @@ Testing code:
 	kprintf( "sysread test result returns %d, expecting -1\n", sysreadTest );
 Test output:
 	sysread test result returns -1, expecting -1
-Test Passed:
+Test Passed: Yes
 
 _______________________________________________________________________________
 Test #9:  First test cases for scenario not covered here or in 
