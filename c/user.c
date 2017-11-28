@@ -27,6 +27,8 @@ void test( void ) {
 		sysreadTest,
 		syscloseTest;
 
+	int	myPID = sysgetpid();
+
 //	1. showing prioritization and signal intterupting each other
 	
 //	2. syssighandler() test
@@ -36,8 +38,8 @@ void test( void ) {
 	kprintf( "syskill test result returns %d, expecting -561\n", syskillTest );
 
 //	4. syswait() test
-	syswaitTest = syswait( 0 );
 	kprintf( "trying to terminate idle process\n" );
+	syswaitTest = syswait( 0 );
 	kprintf( "syswait test result returns %d, expecting -1\n", syswaitTest );
 
 //	5. sysopen() test with invalid arguments
@@ -57,15 +59,17 @@ void test( void ) {
 	kprintf( "sysopen test result returns %d, expecting 1\n", sysopenTest );
 	kprintf( "sysioctl test result returns %d, expecting -1\n", sysioctlTest );
 
-	sysioctlTest = sysioctl( 0, 56 );	// 9. test for uncovered cases (1/2)
-	kprintf( "sysioctl test result returns %d, expecting 0\n", sysioctlTest );
-
 //	8. sysread() when there are more characters buffered in kernal than read request
 	sysreadTest = sysread( 0, buffer, sizeof(int) - 1 );
 	kprintf( "sysread test result returns %d, expecting ??\n", sysreadTest );
 
-	syscloseTest = sysclose( 0 );	// 9. tests for uncovered cases (2/2)
-	kprintf( "sysclose test result returns %d, expecting 0\n", syscloseTest );
+//	9. two test cases for scenarios not covered here or in the test program
+	syskillTest = syskill( 65, 5 );			// (1/2)
+	kprintf( "syskill test result returns %d, expecting -512\n", syskillTest );
+	
+	kprintf( "trying to kill self\n" );		// (2/2)
+	syswaitTest = syswait( myPID );
+	kprintf( "syswait test result returns %d, expecting -2\n", syswaitTest );
 
 	sysstop();
 }
