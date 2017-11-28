@@ -237,6 +237,7 @@ int          sysgetcputimes(processStatuses *ps);
 
 /* Keyboard */
 unsigned int kbtoa( unsigned char code );
+static int extchar( unsigned char code );
 
 /**************************/
 /* 2.3 related prototypes */

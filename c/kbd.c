@@ -12,6 +12,7 @@ void echoOFF( void );
 
 short isKeyboardDataReady( void );
 int 			ENTERKEY = 0xa;
+int 			CTL_D = 0x4;
 dvfunc   		deviceTable[2];
 unsigned char 	pressed;
 unsigned char 	keyboardBuffer[4];
@@ -67,26 +68,65 @@ extern int kbdwrite( void *buff, int bufflen ) {
     return -1;
 }
 
-extern int kbdRead(void* buff, unsigned int bufflen) {
-	if (isEchoing){
-    kprintf("In echo read - %c\n", pressed);
-    memset(buff, pressed, bufflen);
-    return 0;
-    }
-     
-    if(!isEchoing) {
-    kprintf("In NonEcho Read\n");
-    return 0;
-    }
-    return -1;
+extern int kbd_handler( void ) {
+    if(isKeyboardDataReady()) {
+        unsigned char fromPort = inb(KBDPORT1);
+        unsigned char character = kbtoa(fromPort);
+        
+        if ((int) character == eofChar) {
+            addCharToBuffer(pressed);
+            kprintf("%c", pressed);
+			return 0;
+		} else if((int)character == CTL_D) {
+			
+        } else if(character == ENTERKEY) {
+            pressed = '\n';
+            addCharToBuffer(pressed);
+            kprintf("%c", pressed);
+			return 0;
+        } else if(character) {
+            kprintf("%c", character);
+            pressed = character;
+            addCharToBuffer(character);
+			return 0;
+    	}
+    
+    	return 0;
+	}
+
+	return 0;
+
 }
 
-/*
-extern int kbdNonEchoRead(void* buff, unsigned int bufflen) {
-    kprintf("In NonEcho Read\n");
-    return 0;
+extern int kbdRead(void* buff, unsigned int bufflen) {
+
+	if(isKeyboardDataReady()) {
+        unsigned char fromPort = inb(KBDPORT1);
+        unsigned char character = kbtoa(fromPort);
+        
+		if (character == eofChar) {
+    		return 0;
+    	} else if(character == CTL_D) {
+    		return 0;
+    	} else if(character == ENTERKEY) {
+       		pressed = '\n';
+       		addCharToBuffer(pressed);
+       		memset(buff, pressed, bufflen);
+       		if (isEchoing){
+       			kprintf("%c", pressed);
+       			}
+			return 0;
+    	} else {
+    		if(isEchoing){
+       			kprintf("%c", character);
+       			}
+       		pressed = character;
+       		memset(buff, pressed, bufflen);
+       		addCharToBuffer(character);
+    			}
+		}
+	return 0;
 }
-*/
 
 
 extern int kbdioctl(unsigned long command, char newEofChar) {
@@ -112,33 +152,7 @@ extern int kbdioctl(unsigned long command, char newEofChar) {
 	return -1;
 }
 
-extern int kbd_handler( void ) {
-    if(isKeyboardDataReady()) {
-        unsigned char fromPort = inb(KBDPORT1);
-        unsigned char character = kbtoa(fromPort);
-        
-        if ((int) character == eofChar) {
-            addCharToBuffer(pressed);
-            kprintf("%c", pressed);
-			return 0;
-        } else if(character == ENTERKEY) {
-            pressed = '\n';
-            addCharToBuffer(pressed);
-            kprintf("%c", pressed);
-			return 0;
-        } else if(character) {
-            kprintf("%c", character);
-            pressed = character;
-            addCharToBuffer(character);
-			return 0;
-    	}
-    
-    	return 0;
-	}
 
-	return 0;
-
-}
 
 void echoON( void ) {
 
