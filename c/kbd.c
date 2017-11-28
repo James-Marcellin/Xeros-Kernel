@@ -7,14 +7,16 @@
 
 
 void addCharToBuffer(char character);
+void echoON( void );
+void echoOFF( void );
 
 short isKeyboardDataReady( void );
-int ENTERKEY = 0xa;
-dvfunc   deviceTable[4];
-unsigned char Pressed;
-unsigned char keyboardBuffer[4];
-unsigned char eofChar;
-Bool isEchoing;
+int 			ENTERKEY = 0xa;
+dvfunc   		deviceTable[2];
+unsigned char 	pressed;
+unsigned char 	keyboardBuffer[4];
+unsigned char 	eofChar;
+Bool 			isEchoing;
 
 
 
@@ -22,6 +24,8 @@ Bool isEchoing;
 
 extern int kbdopen(pcb* process, dvfunc* device, int dvnum) {
     kprintf("kbdopen()\n");
+
+	int fdnum = dvnum;
     
     fdt* echoKbd = &process->fileDescriptorTable[KBD_ECHO];
     fdt* nonEchoKbd = &process->fileDescriptorTable[KBD_NON_ECHO];
@@ -31,12 +35,23 @@ extern int kbdopen(pcb* process, dvfunc* device, int dvnum) {
         return -1;
     } else {
         kprintf("Opening keyboard %d (0 = nonecho, 1 = echo)\n", dvnum);
-        isEchoing = (Bool) dvnum;
+
+		// although we know we only have 2 devices to deal with, which is echo and non-echo keyboard
+		// in reality, we don't know how many devices we would be dealing with
+		// there for instead of just setting up if( dvnum ), we make it general by case checking        
+		if( dvnum == 0 ) {
+			echoOFF();
+		}
+
+		if( dvnum == 1 ) {
+			echoON();
+		} 
+
         enable_irq(1,0);
-		process->fileDescriptorTable[dvnum].status = DEVICE_OPENED;
+		process->fileDescriptorTable[fdnum].status = DEVICE_OPENED;
     }
     
-    return 0;
+    return fdnum;
 }
 
 extern int kbdclose(pcb* process, dvfunc* device, int dvnum) {
@@ -54,8 +69,8 @@ extern int kbdwrite( void *buff, int bufflen ) {
 
 extern int kbdRead(void* buff, unsigned int bufflen) {
 	if (isEchoing){
-    kprintf("In echo read - %c\n", Pressed);
-    memset(buff, Pressed, bufflen);
+    kprintf("In echo read - %c\n", pressed);
+    memset(buff, pressed, bufflen);
     return 0;
     }
      
@@ -81,14 +96,19 @@ extern int kbdioctl(unsigned long command, char newEofChar) {
 	}
 	
 	if(command == 55){
-	isEchoing = FALSE;
+	echoOFF();
+	kprintf( "echo mode is now OFF\n");
 	return 0;
 	}
 	
 	if (command == 56){
-	isEchoing = TRUE;	
+	echoON();
+	kprintf( "echo mode is now ON\n" );
 	return 0;
 	}
+
+	// if we get to this point, we have an invalid command
+	kprintf( "invalid command %d\n", command );	
 	return -1;
 }
 
@@ -98,17 +118,17 @@ extern int kbd_handler( void ) {
         unsigned char character = kbtoa(fromPort);
         
         if ((int) character == eofChar) {
-            addCharToBuffer(Pressed);
-            kprintf("%c", Pressed);
+            addCharToBuffer(pressed);
+            kprintf("%c", pressed);
 			return 0;
         } else if(character == ENTERKEY) {
-            Pressed = '\n';
-            addCharToBuffer(Pressed);
-            kprintf("%c", Pressed);
+            pressed = '\n';
+            addCharToBuffer(pressed);
+            kprintf("%c", pressed);
 			return 0;
         } else if(character) {
             kprintf("%c", character);
-            Pressed = character;
+            pressed = character;
             addCharToBuffer(character);
 			return 0;
     	}
@@ -119,6 +139,19 @@ extern int kbd_handler( void ) {
 	return 0;
 
 }
+
+void echoON( void ) {
+
+	isEchoing = TRUE;
+
+}
+
+void echoOFF( void ) {
+
+	isEchoing = FALSE;
+
+}
+
 // insert character into keyboardBuffer[]
 void addCharToBuffer(char character) {
     int i;
@@ -134,6 +167,8 @@ short isKeyboardDataReady( void ) {
     return (inb(KBDPORT2) & 0x01);
 }
 
+
+// source code provided by instructor in scancodeToAscii.txt
 static int extchar( unsigned char code ){
 	return state &= ~EXTENDED;
 }

@@ -33,6 +33,22 @@ void di_init() {
 
 int di_open( pcb* p, int majorNum ) {
 
+	// check if the device exists
+	// if not, then the passed majorNum is invalid and we return -1
+	// we want the code to be as general as possible, so we do it be case checking
+
+	switch( majorNum ) {
+		// if the device exists, breaks right out of the check phase and let dvopen handle the rest
+		case( KBD_NON_ECHO ):
+		case( KBD_ECHO ):
+			kprintf( "majorNum %d, device found\n", majorNum );
+			break;
+
+		default:
+			kprintf( "device with majorNum %d not found\n", majorNum );
+			return -1;
+	}
+
 	dvfunc* device = &deviceTable[majorNum];
 	int dvnum = p->fileDescriptorTable[majorNum].majorNum;
 
@@ -70,7 +86,7 @@ int	di_close( pcb* p, int fd ) {
 int	di_write( pcb* p, int fd, void *buff, int bufflen ) {
 
 	if( invalidFd( fd ) ) {
-		kprintf( "invalid fd\n" );
+		kprintf( "invalid fd %d\n", fd );
 	} else if( p->fileDescriptorTable[fd].status != DEVICE_OPENED ) {
 		kprintf( "targeted device isn't open" );
 	} else {

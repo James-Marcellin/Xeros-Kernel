@@ -27,13 +27,13 @@ static void idleproc( void )
 
 
 /************************************************************************/
-/***				NOTE:				      ***/
-/***								      ***/
+/***								NOTE:				  		      ***/
+/***								   							      ***/
 /***   This is where the system begins after the C environment has    ***/
 /***   been established.  Interrupts are initially DISABLED.  The     ***/
 /***   interrupt table has been initialized with a default handler    ***/
-/***								      ***/
-/***								      ***/
+/***								      							  ***/
+/***																  ***/
 /************************************************************************/
 
 /*------------------------------------------------------------------------
@@ -43,7 +43,7 @@ static void idleproc( void )
 void initproc( void )				/* The beginning */
 {
   kprintf( "\n\nCPSC 415, 2016W1 \n32 Bit Xeros 0.01 \nLocated at: %x to %x\n", 
-	   &entry, &end); 
+	  		 &entry, &end); 
   
   /* Your code goes here */
   
