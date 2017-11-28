@@ -281,6 +281,9 @@ void 	enable_irq( unsigned int,  int);
 /* The initial process that the system creates and schedules */
 void     root( void );
 
+/* The initial process for testing purposes */
+void	 test( void );
+
 
 
 
